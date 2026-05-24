@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { Button } from './ui/Button'
 import { NoteCard } from './NoteCard'
 import { CategoryConfirmation } from './CategoryConfirmation'
 import { useNotes } from '../hooks/useNotes'
+import { useNoteLinks } from '../hooks/useNoteLinks'
 import { categorizeNote } from '../lib/api'
 import { Loader2, Send } from 'lucide-react'
 
@@ -21,6 +22,12 @@ export function CaptureNote() {
   const textareaRef = useRef(null)
 
   const { notes, loading: notesLoading, createNote, deleteNote } = useNotes()
+  const { getLinkedIds, createLink, deleteLink } = useNoteLinks()
+
+  const notesById = useMemo(
+    () => Object.fromEntries(notes.map((n) => [n.id, n])),
+    [notes]
+  )
 
   const isProcessing = state === CAPTURE_STATES.CATEGORIZING || state === CAPTURE_STATES.SAVING
 
@@ -166,7 +173,16 @@ export function CaptureNote() {
             </p>
           ) : (
             notes.map((note) => (
-              <NoteCard key={note.id} note={note} onDelete={deleteNote} />
+              <NoteCard
+                key={note.id}
+                note={note}
+                allNotes={notes}
+                linkedIds={getLinkedIds(note.id)}
+                notesById={notesById}
+                onDelete={deleteNote}
+                onLink={createLink}
+                onUnlink={deleteLink}
+              />
             ))
           )}
         </section>

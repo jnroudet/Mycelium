@@ -8,3 +8,12 @@ export async function categorizeNote(content) {
   if (error) throw new Error(error.message)
   return data
 }
+
+export async function suggestLinks(noteContent, candidates) {
+  const { data, error } = await supabase.functions.invoke('suggest-links', {
+    body: { noteContent, candidates },
+  })
+
+  if (error) throw new Error(error.message)
+  return data
+}
